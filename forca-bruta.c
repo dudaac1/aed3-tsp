@@ -6,7 +6,10 @@
 #define ARQ_DETALHES "detalhes.txt"
 #define LINHAS_DETALHES 4
 
-FILE * abrirArq(int * tam, FILE ** arq, char * nomeArq);
+int contador = 0;
+char * nomeArq;
+
+FILE * abrirArq(int * tam, FILE ** arq);
 void lerArq(int ** mat, int tam, FILE * arq);
 int ** alocaMatriz(int tam);
 int * alocaVetor(int tam);
@@ -22,6 +25,9 @@ int main(int argc, char * argv[]) {
     exit(1);
   }
 
+  nomeArq = (char*)malloc(sizeof(char)* strlen(argv[1]));
+  strcpy(nomeArq, argv[1]);
+
   int ** matriz, * vet, tam, op, * caminho;
   FILE * arq;
   int custoMinimo = 19999;
@@ -34,7 +40,7 @@ int main(int argc, char * argv[]) {
   scanf(" %d", &op);
   switch (op) {
   case 1:
-    abrirArq(&tam, &arq, argv[1]);
+    abrirArq(&tam, &arq);
     vet = alocaVetor(tam);
     matriz = alocaMatriz(tam);
     lerArq(matriz, tam, arq);
@@ -53,39 +59,7 @@ int main(int argc, char * argv[]) {
   return 0;
 }
 
-FILE * abrirArq(int * tam, FILE ** arq, char * nomeArq) {
-  /* *arq = fopen(ARQ_DETALHES, "r");
-  if (*arq == NULL) { 
-    printf("Nao foi possivel abrir arquivo de detalhes das matrizes\n");
-    exit(1); 
-  }
-  char linha[TAM_MAX_LINHA];
-  int i;
-  while (!feof(*arq)) {
-    for (i = 0; i < LINHAS_DETALHES; i++) {
-      fgets(linha, TAM_MAX_LINHA, *arq);
-      printf("%s", linha);
-    }
-    printf("\n");
-  }
-  int escolha;
-  do {
-    printf("\n\nDigite o numero do arquivo que deseja abrir: ");
-    scanf("%d", &escolha);
-  } while (escolha < 0 || escolha > i);
-
-  rewind(*arq);
-  char nomeArq[TAM_MAX_LINHA];
-  // char aux[TAM_MAX_LINHA];
-  for (i = 1; i < escolha; i++) {
-    for (int j = 0; j < LINHAS_DETALHES; j++)
-      fgets(linha, TAM_MAX_LINHA, *arq);
-  }
-  fgets(linha, TAM_MAX_LINHA, *arq);
-  fgets(nomeArq, TAM_MAX_LINHA, *arq);
-  // fgets(aux, TAM_MAX_LINHA, *arq);
-  fclose(*arq); */
-
+FILE * abrirArq(int * tam, FILE ** arq) {
   printf("Arquivo %s", nomeArq);
   *arq = fopen(nomeArq, "r");
   if (!(*arq)) {
@@ -101,7 +75,6 @@ FILE * abrirArq(int * tam, FILE ** arq, char * nomeArq) {
   }
   rewind(*arq);
   printf("\nQuantidade de nodos do grafo: %d\n", *tam);
-  // return arq;
 }
 
 void lerArq(int ** mat, int tam, FILE * arq) {
@@ -149,6 +122,7 @@ int * alocaVetor(int tam) {
 }
 
 int calcCustoMin(int * ciclo, int ** m, int tam, int ** caminho) {
+  contador++;
   int j, custo = 0;
   for (j = 0; j < tam - 1; j++) { // calcula o custo de cada vertice
     custo += m[ciclo[j]][ciclo[j + 1]];
@@ -158,6 +132,26 @@ int calcCustoMin(int * ciclo, int ** m, int tam, int ** caminho) {
   custo += m[ciclo[tam - 1]][ciclo[0]]; // calcula o ultimo o custo do ultimo vertice
   (*caminho)[tam-1] = ciclo[tam-1];
   // printf("(%d)\n", ciclo[tam-1]); //imprime ultimo nodo de calculo de custo
+
+  if (contador % 500000000 == 0) {
+    char * nomeArquivo = malloc(sizeof(char)*1024);
+    strcpy(nomeArquivo, "log-");
+    strcat(nomeArquivo, nomeArq);
+    FILE * arquivo = fopen(nomeArquivo, "w");
+    if (!arquivo) {
+      printf("problema para salvar dados no txt\n");
+    } else {
+      fprintf(arquivo, "%d :: ", contador);
+      for (int i = 0; i < tam - 1; i++)
+        fprintf(arquivo, "(%d) -> ", (*caminho)[i]);
+      fprintf(arquivo, "(%d) :: %d\n", (*caminho)[tam - 1], custo);
+      printf("Salvo. ");
+      contador = 0;
+    }
+    fclose(arquivo);
+    free(nomeArquivo);
+  }
+
   return custo; // retorna o custo calculado
 }
 
@@ -174,14 +168,15 @@ void forcabruta(int * ciclo, int ** mat, int tam, int pos, int * custoMinimo, in
   int * caminho_local = (int*)malloc(sizeof(int) * tam);
 
   if (pos == tam - 1) {
+    ++contador;
     custo = calcCustoMin(ciclo, mat, tam, &caminho_local);
-    // printf("\tcusto minimo %d; custo atual: %d\n", * custoMinimo, custo);
     if (custo < *custoMinimo) {
-      printf("\tNOVO VALOR :: custo minimo - anterior: %d; atual: %d\n", * custoMinimo, custo);
+      printf("\n\tNOVO VALOR :: custo minimo - anterior: %d; atual: %d\n", * custoMinimo, custo);
       *custoMinimo = custo;
       for (int i = 0; i < tam; i++)
         (*caminho)[i] = caminho_local[i];
     }
+    
   }
   else {
     for (j = pos; j < tam; j++) {
