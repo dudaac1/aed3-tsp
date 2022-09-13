@@ -73,7 +73,6 @@ double retornaTempo(struct timeval begin, struct timeval end) {
 	return seconds + microseconds * 1e-6;
 }
 
-
 FILE * abrirArq(int * tam, FILE ** arq) {
   printf("Arquivo %s", nomeArq);
   *arq = fopen(nomeArq, "r");
