@@ -19,7 +19,6 @@ int * troca(int * ciclo, int i, int j);
 void forcabruta(int * ciclo, int ** mat, int tam, int pos, int * custoMinimo, int ** caminho);
 void mostrarValores(int tam, int custoMinimo, int * caminho);
 void fechar(int *** m, int ** v, int ** c, FILE ** arq, int tam);
-
 double retornaTempo(struct timeval begin, struct timeval end);
 
 int main(int argc, char * argv[]) {
