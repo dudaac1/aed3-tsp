@@ -15,15 +15,15 @@ Foi disponibilizado cinco matrizes adjacentes para cinco grafos diferentes para 
 - Matriz 5 (tsp5): 29x29 - custo do caminho mínimo: 27.603
 
 ## ⌨ Códigos
+### Aproximativo
+Implementação baseada no código de [Arthur Cerveira](https://github.com/arthurcerveira/Travelling-Salesman-Problem).
+
 ### Força Bruta
-Código de ![Junior Garcia](https://github.com/garciajunior/Trabalho-Final-COM111), baseado no ![Trabalho de Conclusão de Curso](https://docplayer.com.br/7645549-Problema-do-caixeiro-viajante-aplicado-ao-roteamento-de-veiculos-numa-malha-viaria-jose-luiz-machado-morais.html) de José Luiz Machado Morais.
+Código de [Junior Garcia](https://github.com/garciajunior/Trabalho-Final-COM111), baseado no [Trabalho de Conclusão de Curso](https://docplayer.com.br/7645549-Problema-do-caixeiro-viajante-aplicado-ao-roteamento-de-veiculos-numa-malha-viaria-jose-luiz-machado-morais.html) de José Luiz Machado Morais.
 - ```forca-bruta-original.c``` - código de Junior Garcia;
 - ```forca-bruta.c``` - código adaptado;
 - ```forca-bruta-tempo.c``` - código anterior com medicação de tempo;
 - ```forca-bruta-simples.c``` - código sem persistência de dados (há diferença de tempos de execução deste para o forca-bruta.c).
-
-### Aproximativo
-Implementação baseada no código de ![Arthur Cerveira](https://github.com/arthurcerveira/Travelling-Salesman-Problem).
 
 ## 🗃 Organização do Diretório
 ```
@@ -53,5 +53,4 @@ Implementação baseada no código de ![Arthur Cerveira](https://github.com/arth
 ##
 *Eduarda A. Carvalho e Júlia R. Junqueira, setembro/2022.<br>
 Última alteração: setembro/2022.<br>
-eduarda.carvalho@inf.ufpel.edu.br, juliar.junqueira@inf.ufpel.edu.br
-*
+eduarda.carvalho@inf.ufpel.edu.br, juliar.junqueira@inf.ufpel.edu.br*
