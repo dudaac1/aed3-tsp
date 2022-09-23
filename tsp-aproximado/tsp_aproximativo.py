@@ -75,7 +75,7 @@ def approximate_tsp(matrix, initial_node=0):
     #Cria um caminho até que todos os nodos estejam conectados
     while len(set(path)) != len(nodes):
         for connected_node in nodes:
-            #Se não possui borda (limite),
+            #Se não possui aresta,
             if MST[current_node, connected_node] == 0 and MST[connected_node, current_node] == 0:
                 continue
 
@@ -89,7 +89,7 @@ def approximate_tsp(matrix, initial_node=0):
                 previous_node = -1
                 break
         else:
-            #Se não encontrou uma borda, volta para o nodo anterior
+            #Se não encontrou uma aresta, volta para o nodo anterior
             current_node = path[previous_node]
             previous_node = previous_node - 1
             
