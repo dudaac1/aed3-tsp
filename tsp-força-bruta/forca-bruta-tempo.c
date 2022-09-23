@@ -4,8 +4,6 @@
 #include <sys/time.h>
 
 #define TAM_MAX_LINHA 1024
-#define ARQ_DETALHES "detalhes.txt"
-#define LINHAS_DETALHES 4
 
 int contador = 0;
 char * nomeArq;
@@ -49,11 +47,11 @@ int main(int argc, char * argv[]) {
     matriz = alocaMatriz(tam);
     lerArq(matriz, tam, arq);
     caminho = (int *)malloc(sizeof(int) * tam);
-	gettimeofday(&begin, 0);
+	  gettimeofday(&begin, 0);
     forcabruta(vet, matriz, tam, 0, &custoMinimo, &caminho);
-	gettimeofday(&end, 0);
+	  gettimeofday(&end, 0);
     mostrarValores(tam, custoMinimo, caminho);
-	printf("Tempo: %f segundos\n", retornaTempo(begin, end));
+	  printf("Tempo: %f segundos\n", retornaTempo(begin, end));
     break;
   case 2:
     fechar(&matriz, &vet, &caminho, &arq, tam);
@@ -184,12 +182,14 @@ void forcabruta(int * ciclo, int ** mat, int tam, int pos, int * custoMinimo, in
     ++contador;
     custo = calcCustoMin(ciclo, mat, tam, &caminho_local);
     if (custo < *custoMinimo) {
-      printf("\nNOVO VALOR :: custo minimo - anterior: %d; atual: %d\n\t", * custoMinimo, custo);
+      printf("NOVO VALOR :: custo minimo - anterior: %d; atual: %d\n\t", * custoMinimo, custo);
       *custoMinimo = custo;
       for (int i = 0; i < tam; i++) {
         (*caminho)[i] = caminho_local[i];
-        printf("(%d) ", (*caminho)[i]);
+        printf("(%d) -> ", (*caminho)[i]);
       }
+        (*caminho)[tam-1] = caminho_local[tam-1];
+        printf("(%d)\n", (*caminho)[tam-1]);
     }
     
   }

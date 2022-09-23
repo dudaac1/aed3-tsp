@@ -3,8 +3,6 @@
 #include <string.h>
 
 #define TAM_MAX_LINHA 1024
-#define ARQ_DETALHES "detalhes.txt"
-#define LINHAS_DETALHES 4
 
 int contador = 0;
 char * nomeArq;
@@ -82,8 +80,6 @@ void lerArq(int ** mat, int tam, FILE * arq) {
   for (i = 0; i < tam; i++)   {
     for (j = 0; j < tam; j++)     {
       fscanf(arq, "%d", &mat[i][j]);
-      // if (mat[i][j] == -1) // cidades não estão conectadas
-        // mat[i][j] = 100000; // Assim são desconsideradas
     }
   }
 }
@@ -116,7 +112,6 @@ int * alocaVetor(int tam) {
     exit(1);
   }
   for (i = 0; i < tam; i++)
-    // Atribui as posições de cada cidade para permitir a permutação
     vet[i] = i;
   return vet;
 }
@@ -124,14 +119,14 @@ int * alocaVetor(int tam) {
 int calcCustoMin(int * ciclo, int ** m, int tam, int ** caminho) {
   contador++;
   int j, custo = 0;
-  for (j = 0; j < tam - 1; j++) { // calcula o custo de cada vertice
+  for (j = 0; j < tam - 1; j++) { 
     custo += m[ciclo[j]][ciclo[j + 1]];
     (*caminho)[j] = ciclo[j];
-    // printf("(%d) -> ", ciclo[j]); //imprime cada nodo de cada calculo de custo
+    printf("(%d) -> ", ciclo[j]); //imprime cada nodo de cada calculo de custo
   }
-  custo += m[ciclo[tam - 1]][ciclo[0]]; // calcula o ultimo o custo do ultimo vertice
+  custo += m[ciclo[tam - 1]][ciclo[0]]; 
   (*caminho)[tam-1] = ciclo[tam-1];
-  // printf("(%d)\n", ciclo[tam-1]); //imprime ultimo nodo de calculo de custo
+  printf("(%d)\n", ciclo[tam-1]); //imprime ultimo nodo de calculo de custo
 
   if (contador % 500000000 == 0) {
     char * nomeArquivo = malloc(sizeof(char)*1024);
@@ -152,7 +147,7 @@ int calcCustoMin(int * ciclo, int ** m, int tam, int ** caminho) {
     free(nomeArquivo);
   }
 
-  return custo; // retorna o custo calculado
+  return custo; 
 }
 
 int * troca(int * ciclo, int i, int j) {
@@ -163,7 +158,7 @@ int * troca(int * ciclo, int i, int j) {
 }
 
 void forcabruta(int * ciclo, int ** mat, int tam, int pos, int * custoMinimo, int ** caminho) {
-  int custo = 0; // custo calculado para cada vertice do caminho
+  int custo = 0; 
   int j;
   int * caminho_local = (int*)malloc(sizeof(int) * tam);
 
@@ -173,18 +168,19 @@ void forcabruta(int * ciclo, int ** mat, int tam, int pos, int * custoMinimo, in
     if (custo < *custoMinimo) {
       printf("NOVO VALOR :: custo minimo - anterior: %d; atual: %d\n\t", * custoMinimo, custo);
       *custoMinimo = custo;
-      for (int i = 0; i < tam - 1; i++) {
+      //atribui caminho minimo atual pra variavel e o imprime
+      for (int i = 0; i < tam - 1; i++) { 
         (*caminho)[i] = caminho_local[i];
         printf("(%d) -> ", (*caminho)[i]);
       }
       (*caminho)[tam-1] = caminho_local[tam-1];
-      printf("(%d)\n", (*caminho)[tam-1]);
+      printf("(%d)\n", (*caminho)[tam-1]); 
     }
-    
   }
   else {
     for (j = pos; j < tam; j++) {
-      ciclo = troca(ciclo, pos, j); // responsavel por fazer a troca dos vertices de cidades (permutação)
+      printf("%d %d - %d %d\n", ciclo[pos], ciclo[j], pos, j);
+      ciclo = troca(ciclo, pos, j); 
       forcabruta(ciclo, mat, tam, pos + 1, custoMinimo, caminho); //
       ciclo = troca(ciclo, pos, j);
     }

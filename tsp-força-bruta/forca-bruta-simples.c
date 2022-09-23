@@ -1,36 +1,31 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/time.h>
 
 #define TAM_MAX_LINHA 1024
-#define ARQ_DETALHES "detalhes.txt"
-#define LINHAS_DETALHES 4
 
-int contador = 0;
-char * nomeArq;
-
-FILE * abrirArq(int * tam, FILE ** arq);
+FILE * abrirArq(int * tam, FILE ** arq, char * nomeArq);
 void lerArq(int ** mat, int tam, FILE * arq);
 int ** alocaMatriz(int tam);
 int * alocaVetor(int tam);
-int calcCustoMin(int * ciclo, int ** m, int tam, int ** caminho);
+int calcCustoMin(int * ciclo, int ** m, int tam);
 int * troca(int * ciclo, int i, int j);
-void forcabruta(int * ciclo, int ** mat, int tam, int pos, int * custoMinimo, int ** caminho);
-void mostrarValores(int tam, int custoMinimo, int * caminho);
-void fechar(int *** m, int ** v, int ** c, FILE ** arq, int tam);
+void forcabruta(int * ciclo, int ** mat, int tam, int pos, int * custoMinimo);
+void fechar(int *** m, int ** v, FILE ** arq, int tam);
+double retornaTempo(struct timeval begin, struct timeval end);
 
 int main(int argc, char * argv[]) {
   if (argc == 1) {
     printf("\nNecessario o nome do .txt da matriz de custo ao executar o .exe.\n");
     exit(1);
   }
+  
+  struct timeval begin, end;
 
-  nomeArq = (char*)malloc(sizeof(char)* strlen(argv[1]));
-  strcpy(nomeArq, argv[1]);
-
-  int ** matriz, * vet, tam, op, * caminho;
+  int ** matriz, * vet, tam, op;
   FILE * arq;
-  int custoMinimo = 19999;
+  int custoMinimo = 99999;
 
   printf("\n********************\n");
   printf("*  MENU PRINCIPAL  *\n");
@@ -40,16 +35,18 @@ int main(int argc, char * argv[]) {
   scanf(" %d", &op);
   switch (op) {
   case 1:
-    abrirArq(&tam, &arq);
+    abrirArq(&tam, &arq, argv[1]);
     vet = alocaVetor(tam);
     matriz = alocaMatriz(tam);
     lerArq(matriz, tam, arq);
-    caminho = (int *)malloc(sizeof(int) * tam);
-    forcabruta(vet, matriz, tam, 0, &custoMinimo, &caminho);
-    mostrarValores(tam, custoMinimo, caminho);
+    gettimeofday(&begin, 0);
+    forcabruta(vet, matriz, tam, 0, &custoMinimo);
+	  gettimeofday(&end, 0);
+		printf("\nMENOR CUSTO: %d\n", custoMinimo);
+    printf("Tempo: %f segundos\n", retornaTempo(begin, end));
     break;
   case 2:
-    fechar(&matriz, &vet, &caminho, &arq, tam);
+    fechar(&matriz, &vet, &arq, tam);
     printf("Encerrando o programa.\n");
     break;
   default:
@@ -59,7 +56,13 @@ int main(int argc, char * argv[]) {
   return 0;
 }
 
-FILE * abrirArq(int * tam, FILE ** arq) {
+double retornaTempo(struct timeval begin, struct timeval end) {
+	long seconds = end.tv_sec - begin.tv_sec;
+	long microseconds = end.tv_usec - begin.tv_usec;
+	return seconds + microseconds * 1e-6;
+}
+
+FILE * abrirArq(int * tam, FILE ** arq, char * nomeArq) {
   printf("Arquivo %s", nomeArq);
   *arq = fopen(nomeArq, "r");
   if (!(*arq)) {
@@ -75,6 +78,7 @@ FILE * abrirArq(int * tam, FILE ** arq) {
   }
   rewind(*arq);
   printf("\nQuantidade de nodos do grafo: %d\n", *tam);
+  // return arq;
 }
 
 void lerArq(int ** mat, int tam, FILE * arq) {
@@ -121,37 +125,14 @@ int * alocaVetor(int tam) {
   return vet;
 }
 
-int calcCustoMin(int * ciclo, int ** m, int tam, int ** caminho) {
-  contador++;
+int calcCustoMin(int * ciclo, int ** m, int tam) {
   int j, custo = 0;
   for (j = 0; j < tam - 1; j++) { // calcula o custo de cada vertice
     custo += m[ciclo[j]][ciclo[j + 1]];
-    (*caminho)[j] = ciclo[j];
     // printf("(%d) -> ", ciclo[j]); //imprime cada nodo de cada calculo de custo
   }
   custo += m[ciclo[tam - 1]][ciclo[0]]; // calcula o ultimo o custo do ultimo vertice
-  (*caminho)[tam-1] = ciclo[tam-1];
   // printf("(%d)\n", ciclo[tam-1]); //imprime ultimo nodo de calculo de custo
-
-  if (contador % 500000000 == 0) {
-    char * nomeArquivo = malloc(sizeof(char)*1024);
-    strcpy(nomeArquivo, "log-");
-    strcat(nomeArquivo, nomeArq);
-    FILE * arquivo = fopen(nomeArquivo, "w");
-    if (!arquivo) {
-      printf("problema para salvar dados no txt\n");
-    } else {
-      fprintf(arquivo, "%d :: ", contador);
-      for (int i = 0; i < tam - 1; i++)
-        fprintf(arquivo, "(%d) -> ", (*caminho)[i]);
-      fprintf(arquivo, "(%d) :: %d\n", (*caminho)[tam - 1], custo);
-      printf("Salvo. ");
-      contador = 0;
-    }
-    fclose(arquivo);
-    free(nomeArquivo);
-  }
-
   return custo; // retorna o custo calculado
 }
 
@@ -162,41 +143,28 @@ int * troca(int * ciclo, int i, int j) {
   return ciclo;
 }
 
-void forcabruta(int * ciclo, int ** mat, int tam, int pos, int * custoMinimo, int ** caminho) {
+void forcabruta(int * ciclo, int ** mat, int tam, int pos, int * custoMinimo) {
   int custo = 0; // custo calculado para cada vertice do caminho
   int j;
-  int * caminho_local = (int*)malloc(sizeof(int) * tam);
 
   if (pos == tam - 1) {
-    ++contador;
-    custo = calcCustoMin(ciclo, mat, tam, &caminho_local);
+    custo = calcCustoMin(ciclo, mat, tam);
     if (custo < *custoMinimo) {
-      printf("\n\tNOVO VALOR :: custo minimo - anterior: %d; atual: %d\n", * custoMinimo, custo);
+      printf("\tNOVO VALOR :: custo minimo - anterior: %d; atual: %d\n", * custoMinimo, custo);
       *custoMinimo = custo;
-      for (int i = 0; i < tam; i++)
-        (*caminho)[i] = caminho_local[i];
     }
-    
   }
   else {
     for (j = pos; j < tam; j++) {
       ciclo = troca(ciclo, pos, j); // responsavel por fazer a troca dos vertices de cidades (permutação)
-      forcabruta(ciclo, mat, tam, pos + 1, custoMinimo, caminho); //
+      forcabruta(ciclo, mat, tam, pos + 1, custoMinimo); //
       ciclo = troca(ciclo, pos, j);
     }
   }
-  free(caminho_local);
   return;
 }
 
-void mostrarValores(int tam, int custoMinimo, int * caminho) {
-  printf("\nMENOR CUSTO: %d\nCaminho encontrado: ", custoMinimo);
-  for (int i = 0; i < tam - 1; i++)
-    printf("(%d) -> ", caminho[i]);
-  printf("(%d)\n\n", caminho[tam-1]);
-}
-
-void fechar(int *** m, int ** v, int ** c, FILE ** arq, int tam) {
+void fechar(int *** m, int ** v, FILE ** arq, int tam) {
   if (!(*arq))   {
     printf("Nao e possivel fechar arquivo pois nao esta aberto\n");
     exit(1);
@@ -204,7 +172,6 @@ void fechar(int *** m, int ** v, int ** c, FILE ** arq, int tam) {
   fclose(*arq);
 
   free(*v);
-  free(*c);
   for (int i = 0; i < tam; i++)
     free((*m)[i]);
   free(*m);
